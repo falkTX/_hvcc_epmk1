@@ -1,0 +1,15 @@
+{
+    "dpf": {
+        "project": true,
+        "description": "electric piano based on EP-MK1.pd",
+        "license": "WTFPL",
+        "midi_input": 1,
+        "midi_output": 0,
+        "plugin_formats": [
+            "jack",
+            "lv2_dsp",
+            "vst2",
+            "vst3"
+        ]
+    }
+}
