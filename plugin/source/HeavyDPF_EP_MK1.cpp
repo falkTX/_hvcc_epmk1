@@ -30,6 +30,7 @@
  * 
  */
 
+#include "Heavy_EP_MK1.h"
 #include "HeavyDPF_EP_MK1.hpp"
 #include <set>
 
@@ -105,7 +106,7 @@ HeavyDPF_EP_MK1::HeavyDPF_EP_MK1()
 {
   
 
-  _context = new Heavy_EP_MK1(getSampleRate(), 10, 2, 2);
+  _context = hv_EP_MK1_new_with_options(getSampleRate(), 10, 2, 2);
   _context->setUserData(this);
   _context->setSendHook(&hvSendHookFunc);
   _context->setPrintHook(&hvPrintHookFunc);
@@ -114,7 +115,7 @@ HeavyDPF_EP_MK1::HeavyDPF_EP_MK1()
 }
 
 HeavyDPF_EP_MK1::~HeavyDPF_EP_MK1() {
-  delete _context;
+  hv_EP_MK1_free(_context);
 }
 
 void HeavyDPF_EP_MK1::initParameter(uint32_t index, Parameter& parameter)
@@ -428,9 +429,9 @@ void HeavyDPF_EP_MK1::run(const float** inputs, float** outputs, uint32_t frames
 
 void HeavyDPF_EP_MK1::sampleRateChanged(double newSampleRate)
 {
-  delete _context;
+  hv_EP_MK1_free(_context);
 
-  _context = new Heavy_EP_MK1(newSampleRate, 10, 2, 2);
+  _context = hv_EP_MK1_new_with_options(getSampleRate(), 10, 2, 2);
   _context->setUserData(this);
   _context->setSendHook(&hvSendHookFunc);
   _context->setPrintHook(&hvPrintHookFunc);

@@ -32,8 +32,25 @@
 
 #include "Heavy_EP_MK1.hpp"
 
-#define Context(_c) reinterpret_cast<Heavy_EP_MK1 *>(_c)
+#include <new>
 
+
+#define Context(_c) static_cast<Heavy_EP_MK1 *>(_c)
+
+
+/*
+ * Cross-platform aligned alloc
+ */
+
+inline void* aligned_alloc_16(size_t size) {
+#ifdef _WIN32
+    return _aligned_malloc(size, 16);
+#elif __APPLE__
+    return malloc(size);
+#else
+    return aligned_alloc(16, size);
+#endif
+}
 
 
 /*
@@ -42,12 +59,35 @@
 
 extern "C" {
   HV_EXPORT HeavyContextInterface *hv_EP_MK1_new(double sampleRate) {
-    return new Heavy_EP_MK1(sampleRate);
+    // allocate aligned memory
+    void *ptr = aligned_alloc_16(sizeof(Heavy_EP_MK1));
+    // ensure non-null
+    if (!ptr) return nullptr;
+    // call constructor
+    new(ptr) Heavy_EP_MK1(sampleRate);
+    return Context(ptr);
   }
 
   HV_EXPORT HeavyContextInterface *hv_EP_MK1_new_with_options(double sampleRate,
       int poolKb, int inQueueKb, int outQueueKb) {
-    return new Heavy_EP_MK1(sampleRate, poolKb, inQueueKb, outQueueKb);
+    // allocate aligned memory
+    void *ptr = aligned_alloc_16(sizeof(Heavy_EP_MK1));
+    // ensure non-null
+    if (!ptr) return nullptr;
+    // call constructor
+    new(ptr) Heavy_EP_MK1(sampleRate, poolKb, inQueueKb, outQueueKb);
+    return Context(ptr);
+  }
+
+  HV_EXPORT void hv_EP_MK1_free(HeavyContextInterface *instance) {
+    // call destructor
+    Context(instance)->~Heavy_EP_MK1();
+    // free memory
+#ifdef _WIN32
+    _aligned_free(instance);
+#else
+    free(instance);
+#endif
   }
 } // extern "C"
 
